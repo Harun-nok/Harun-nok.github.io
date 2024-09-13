@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Çörek Yönetim Sistemi</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('/static/images/corek_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        h1, h2, h3, h4 {
+            color: #f8f9fa;
+            text-align: center;
+            margin-top: 20px;
+        }
+        table {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            margin-bottom: 30px;
+        }
+        .form-control, .btn {
+            margin-bottom: 15px;
+        }
+        .navbar {
+            margin-bottom: 30px;
+        }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #f8f9fa;
+        }
+        label {
+            color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigasyon Menüsü -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Çörek Yönetim Sistemi</a>
+    </nav>
+
+    <div class="container">
+        <h1>Çörek Yönetim Sistemi</h1>
+
+        <!-- Günlük Üretim Bilgileri -->
+        <h3>Günlük Üretim Bilgileri</h3>
+        <form action="{{ url_for('update_production') }}" method="post">
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="corek_{{ size }}">Çörek {{ size }} Üretim</label>
+                    <input type="number" name="corek_{{ size }}" id="corek_{{ size }}" class="form-control" value="{{ production['corek_' + size] if production else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-success">Güncelleyerek Kaydet</button>
+        </form>
+
+        <!-- Eksilen Çörekler -->
+        <h3>Eksilen Çörekler</h3>
+        <form action="{{ url_for('add_lost_production') }}" method="post">
+            <!-- Yanan Çörekler -->
+            <h4>Yanan Çörekler</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="yanan_{{ size }}">Yanan {{ size }}</label>
+                    <input type="number" name="yanan_{{ size }}" id="yanan_{{ size }}" class="form-control" value="{{ lost_production['yanan_' + size] if lost_production else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Küt Çörekler -->
+            <h4>Küt Çörekler</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="kut_{{ size }}">Küt {{ size }}</label>
+                    <input type="number" name="kut_{{ size }}" id="kut_{{ size }}" class="form-control" value="{{ lost_production['kut_' + size] if lost_production else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Yiyilen Çörekler -->
+            <h4>Yiyilen Çörekler</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="yiyilen_{{ size }}">Yiyilen {{ size }}</label>
+                    <input type="number" name="yiyilen_{{ size }}" id="yiyilen_{{ size }}" class="form-control" value="{{ lost_production['yiyilen_' + size] if lost_production else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-warning">Eksilen Çörekleri Kaydet</button>
+        </form>
+
+        <!-- Satış Ekleme Formu -->
+        <h3>Yeni Satış Ekle</h3>
+        <form action="{{ url_for('add_sale') }}" method="post">
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="aptavoycu_name">Aptavoycu Adı</label>
+                    <input type="text" name="aptavoycu_name" id="aptavoycu_name" class="form-control" required>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="doner_coreki_180q">180g Döner Çöreği Satış</label>
+                    <input type="number" name="doner_coreki_180q" id="doner_coreki_180q" class="form-control" required>
+                </div>
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-2">
+                    <label for="corek_{{ size }}">Çörek {{ size }} Satış</label>
+                    <input type="number" name="corek_{{ size }}" id="corek_{{ size }}" class="form-control" required>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">Satış Ekle</button>
+        </form>
+
+        <!-- Pencere Satışı ve Ucuz Mallar -->
+        <h3>Pencere Satışı ve Ucuz Mallar</h3>
+        <form action="{{ url_for('add_discounted_and_pencere_sales') }}" method="post">
+            <!-- Pencere Satışı -->
+            <h4>Pencere Satışı</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="corek_{{ size }}">Çörek {{ size }}</label>
+                    <input type="number" name="corek_{{ size }}" id="corek_{{ size }}" class="form-control" value="{{ pencere_sales['corek_' + size] if pencere_sales else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Ucuz Mallar -->
+            <h4>Ucuz Mallar</h4>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="yanan2">Yanan 2</label>
+                    <input type="number" name="yanan2" id="yanan2" class="form-control" value="{{ pencere_sales['yanan2'] if pencere_sales else 0 }}" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="kut2">Küt 2</label>
+                    <input type="number" name="kut2" id="kut2" class="form-control" value="{{ pencere_sales['kut2'] if pencere_sales else 0 }}" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="bos_mesoklar">Boş Meşoklar</label>
+                    <input type="number" name="bos_mesoklar" id="bos_mesoklar" class="form-control" value="{{ pencere_sales['bos_mesoklar'] if pencere_sales else 0 }}" required>
+                </div>
+            </div>
+            <!-- İşçi Çörekleri -->
+            <h4>İşçi Çörekleri</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="isci_corek_{{ size }}">İşçi Çöreği {{ size }}</label>
+                    <input type="number" name="isci_corek_{{ size }}" id="isci_corek_{{ size }}" class="form-control" value="{{ pencere_sales['isci_corek_' + size] if pencere_sales else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Vazvrat Çörekleri -->
+            <h4>Vazvrat Çörekleri</h4>
+            <div class="form-row">
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <div class="form-group col-md-3">
+                    <label for="vazvrat_corek_{{ size }}">Vazvrat Çöreği {{ size }}</label>
+                    <input type="number" name="vazvrat_corek_{{ size }}" id="vazvrat_corek_{{ size }}" class="form-control" value="{{ pencere_sales['vazvrat_corek_' + size] if pencere_sales else 0 }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-warning">Pencere Satışını Kaydet</button>
+        </form>
+
+        <!-- Satışlar Tablosu -->
+        <h2>Satışlar</h2>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Aptavoycu Adı</th>
+                    <th>180g Döner Çöreği</th>
+                    <th>600g Çörek</th>
+                    <th>750g Çörek</th>
+                    <th>800g Çörek</th>
+                    <th>1kg Çörek</th>
+                    <th>Beklenen Gelir (AZN)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale['aptavoycu_name'] }}</td>
+                    <td>{{ sale['doner_coreki_180q'] }}</td>
+                    <td>{{ sale['corek_600q'] }}</td>
+                    <td>{{ sale['corek_750q'] }}</td>
+                    <td>{{ sale['corek_800q'] }}</td>
+                    <td>{{ sale['corek_1kg'] }}</td>
+                    <td>{{ "%.2f" | format(sale['expected_income']) }} AZN</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pencere Satışı Tablosu -->
+        <h2>Pencere Satışı Tablosu</h2>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Ürün</th>
+                    <th>Miktar</th>
+                    <th>Birim Fiyat (AZN)</th>
+                    <th>Toplam Fiyat (AZN)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set products = [
+                    {'name': '600g Çörek', 'quantity': pencere_sales['corek_600q'], 'unit_price': 0.60},
+                    {'name': '750g Çörek', 'quantity': pencere_sales['corek_750q'], 'unit_price': 0.70},
+                    {'name': '800g Çörek', 'quantity': pencere_sales['corek_800q'], 'unit_price': 0.80},
+                    {'name': '1kg Çörek', 'quantity': pencere_sales['corek_1kg'], 'unit_price': 1.00},
+                    {'name': 'Yanan 2', 'quantity': pencere_sales['yanan2'], 'unit_price': 0.20},
+                    {'name': 'Küt 2', 'quantity': pencere_sales['kut2'], 'unit_price': 0.20},
+                    {'name': 'Boş Meşoklar', 'quantity': pencere_sales['bos_mesoklar'], 'unit_price': 0.20},
+                    {'name': 'İşçi Çöreği 600g', 'quantity': pencere_sales['isci_corek_600q'], 'unit_price': 0.40},
+                    {'name': 'İşçi Çöreği 750g', 'quantity': pencere_sales['isci_corek_750q'], 'unit_price': 0.52},
+                    {'name': 'İşçi Çöreği 800g', 'quantity': pencere_sales['isci_corek_800q'], 'unit_price': 0.70},
+                    {'name': 'İşçi Çöreği 1kg', 'quantity': pencere_sales['isci_corek_1kg'], 'unit_price': 0.75},
+                    {'name': 'Vazvrat Çöreği 600g', 'quantity': pencere_sales['vazvrat_corek_600q'], 'unit_price': 0.30},
+                    {'name': 'Vazvrat Çöreği 750g', 'quantity': pencere_sales['vazvrat_corek_750q'], 'unit_price': 0.35},
+                    {'name': 'Vazvrat Çöreği 800g', 'quantity': pencere_sales['vazvrat_corek_800q'], 'unit_price': 0.40},
+                    {'name': 'Vazvrat Çöreği 1kg', 'quantity': pencere_sales['vazvrat_corek_1kg'], 'unit_price': 0.50},
+                ] %}
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ "%.2f" | format(product.unit_price) }}</td>
+                    <td>{{ "%.2f" | format(product.quantity * product.unit_price) }} AZN</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3"><strong>Toplam Gelir</strong></td>
+                    <td><strong>{{ "%.2f" | format(pencere_sales['total_income']) }} AZN</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Günlük Üretim Durumu -->
+        <h2>Günlük Üretim Durumu</h2>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Ürün</th>
+                    <th>Kalan Miktar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for size in ['600q', '750q', '800q', '1kg'] %}
+                <tr>
+                    <td>Çörek {{ size }}</td>
+                    <td>
+                        {% set miktar = production['corek_' + size] if production else 0 %}
+                        {% if miktar < 0 %}
+                            <span style="color: red;">{{ miktar }}</span>
+                        {% else %}
+                            {{ miktar }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Sıfırlama Butonları -->
+        <div class="mb-3 text-center">
+            <form action="{{ url_for('reset_pencere_sales') }}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Pencere Satışını Sıfırla</button>
+            </form>
+            <form action="{{ url_for('reset_production') }}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-warning">Günlük Üretimi Sıfırla</button>
+            </form>
+            <form action="{{ url_for('reset_sales') }}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Satışları Sıfırla</button>
+            </form>
+            <!-- Tüm Sayfayı Sıfırlama Butonu -->
+            <form action="{{ url_for('reset_all') }}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-dark">Tüm Sayfayı Sıfırla</button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2024 Çörek Yönetim Sistemi</p>
+        </footer>
+    </div>
+    <!-- Bootstrap JS ve jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
